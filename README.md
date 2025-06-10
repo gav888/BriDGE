@@ -1,6 +1,6 @@
 # BriDGE: Behavioural Research by Integrating DAGs and GAMs in Experiments
 <p align="center">
-  <img src="man/figures/logo.png" width="200" alt="BriDGE Logo"/>
+  <img src="man/figures/Bridge_icon.png" width="200" alt="BriDGE Logo"/>
 </p>
 
 <!-- badges: start -->
