@@ -1,4 +1,7 @@
 # BriDGE: Behavioural Research by Integrating DAGs and GAMs in Experiments
+<p align="center">
+  <img src="man/figures/logo.png" width="200" alt="BriDGE Logo"/>
+</p>
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/gav888/BriDGE/workflows/R-CMD-check/badge.svg)](https://github.com/gav888/BriDGE/actions)
