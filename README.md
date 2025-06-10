@@ -234,13 +234,13 @@ Copyright (c) 2025 Giuseppe A. Veltri
 
 ## Support
 
-- 📧 Email: [your.email@example.com](mailto:your.email@example.com)
+- 📧 Email: [ga.veltri@gmail.com](mailto:ga.veltri@gmail.com)
 - 🐛 Issues: [GitHub Issues](https://github.com/yourusername/BriDGE/issues)
-- 📖 Documentation: [Package Website](https://yourusername.github.io/BriDGE/)
+- 📖 Documentation: [Package Website](https://yourusername.github.io/BriDGE/) (Under development)
 
 ## News
 
-### Version 1.0.0 (2025-01-XX)
+### Version 1.0.0 (2025-10-06)
 
 - Initial CRAN release
 - Core functionality for causal discovery and mediation analysis
