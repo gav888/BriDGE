@@ -1,7 +1,7 @@
 # BriDGE: Behavioural Research by Integrating DAGs and GAMs in Experiments
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/yourusername/BriDGE/workflows/R-CMD-check/badge.svg)](https://github.com/yourusername/BriDGE/actions)
+[![R-CMD-check](https://github.com/gav888/BriDGE/workflows/R-CMD-check/badge.svg)](https://github.com/gav888/BriDGE/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CRAN status](https://www.r-pkg.org/badges/version/BriDGE)](https://CRAN.R-project.org/package=BriDGE)
 <!-- badges: end -->
