@@ -29,7 +29,7 @@ BriDGE is a comprehensive R package for causal analysis of randomized controlled
 
 ```r
 # install.packages("devtools")
-devtools::install_github("yourusername/BriDGE")
+devtools::install_github("gav888/BriDGE")
 ```
 
 ### CRAN Version (when available)
