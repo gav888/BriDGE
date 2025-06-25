@@ -4,7 +4,7 @@
 </p>
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/gav888/BriDGE/workflows/R-CMD-check/badge.svg)](https://github.com/gav888/BriDGE/actions)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CRAN status](https://www.r-pkg.org/badges/version/BriDGE)](https://CRAN.R-project.org/package=BriDGE)
 <!-- badges: end -->
