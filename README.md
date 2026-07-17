@@ -1,12 +1,15 @@
 # BriDGE: Behavioural Research by Integrating DAGs and GAMs in Experiments
 <p align="center">
-  <img src="Bridge icon.png" width="400" alt="BriDGE Logo"/>
+  <img src="man/figures/bridge-icon.png" width="400" alt="BriDGE Logo"/>
 </p>
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/gav888/BriDGE/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gav888/BriDGE/actions/workflows/R-CMD-check.yaml)
+[![test coverage](https://img.shields.io/badge/coverage-82%25-brightgreen.svg)](https://github.com/gav888/BriDGE/actions/workflows/test-coverage.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <!-- badges: end -->
+
+📖 **Documentation & tutorial**: <https://gav888.github.io/BriDGE/>
 
 ## Overview
 
@@ -17,6 +20,11 @@ BriDGE is the companion package to the paper:
 > Veltri, G. A., & Banerjee, S. (in press). **BriDGE the gap – improving Behavioural research by integrating DAGs and GAMs in Experiments.** *Behavior Research Methods.*
 
 While RCTs provide reliable evidence for intervention efficacy, they are seldom designed to reveal the causal pathways that drive observed outcomes. BriDGE bridges the gap from "what works" to "why and how it works".
+
+<p align="center">
+  <img src="man/figures/README-dag-comparison.png" width="700" alt="Researcher's assumed DAG next to the DAG discovered from the data, with disagreeing edges highlighted"/>
+</p>
+<p align="center"><em>BriDGE contrasts your theoretical causal model (left) with the structure discovered from the data under experimental constraints (right); disagreeing edges (highlighted) become hypotheses to examine.</em></p>
 
 ### Key Features
 

@@ -1,3 +1,17 @@
+# BriDGE 1.1.0
+
+## Documentation & infrastructure
+
+- New "Getting started with BriDGE" vignette walking through the full
+  workflow: data requirements, causal discovery and how to read the DAG
+  comparison, GAM-based mediation and effect interpretation, sensitivity
+  analysis, and practical guidance (`vignette("BriDGE")`).
+- New package website built with pkgdown: <https://gav888.github.io/BriDGE/>.
+- Added `CITATION.cff` so GitHub shows a "Cite this repository" button.
+- Added `CONTRIBUTING.md` and issue templates (bug report, feature request).
+- README now shows the researcher-vs-discovered DAG comparison figure.
+- Added test-coverage and pkgdown CI workflows.
+
 # BriDGE 1.0.0
 
 First public release, accompanying the accepted paper:
