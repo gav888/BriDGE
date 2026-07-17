@@ -1,0 +1,45 @@
+url: https://gav888.github.io/BriDGE/
+
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#2C5F8A"
+
+home:
+  title: "BriDGE: Behavioural research by integrating DAGs and GAMs in Experiments"
+  description: >
+    R package for mechanistic causal analysis of RCT data: causal discovery,
+    GAM-based mediation analysis, and bootstrap inference.
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+
+reference:
+- title: Analysis pipeline
+  contents:
+  - bridge_analyze
+  - bridge_discover
+  - bridge_mediate
+  - bridge_sensitivity
+  - bridge_compare
+- title: Results and visualization
+  contents:
+  - bridge_plot
+  - bridge_summary
+- title: Data
+  contents:
+  - bridge_generate_data
+- title: Package
+  contents:
+  - BriDGE-package
+
+footer:
+  structure:
+    left: citation
+    right: built_with
+  components:
+    citation: >
+      Companion paper: Veltri & Banerjee (in press),
+      Behavior Research Methods.

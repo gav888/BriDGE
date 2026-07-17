@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: >-
+  If you use BriDGE, please cite the companion paper (preferred-citation)
+  and/or the software itself.
+type: software
+title: "BriDGE: Behavioural Research by Integrating DAGs and GAMs in Experiments"
+authors:
+  - family-names: Veltri
+    given-names: Giuseppe A.
+    orcid: "https://orcid.org/0000-0002-9472-2236"
+repository-code: "https://github.com/gav888/BriDGE"
+url: "https://gav888.github.io/BriDGE/"
+license: MIT
+keywords:
+  - causal inference
+  - causal discovery
+  - mediation analysis
+  - generalized additive models
+  - randomized controlled trials
+  - R package
+preferred-citation:
+  type: article
+  title: "BriDGE the gap – improving Behavioural research by integrating DAGs and GAMs in Experiments"
+  authors:
+    - family-names: Veltri
+      given-names: Giuseppe A.
+      orcid: "https://orcid.org/0000-0002-9472-2236"
+    - family-names: Banerjee
+      given-names: Sanchayna
+  journal: "Behavior Research Methods"
+  year: 2026
+  notes: "In press"

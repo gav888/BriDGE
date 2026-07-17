@@ -1,0 +1,32 @@
+name: Bug report
+description: Report an error or unexpected behavior
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the problem and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reprex
+    attributes:
+      label: Minimal reproducible example
+      description: >
+        Ideally using bridge_generate_data() so the example is self-contained.
+      render: r
+      placeholder: |
+        library(BriDGE)
+        data <- bridge_generate_data(n = 200, seed = 1)
+        # code that triggers the problem...
+    validations:
+      required: true
+  - type: textarea
+    id: session
+    attributes:
+      label: sessionInfo()
+      description: Paste the output of sessionInfo().
+      render: r
+    validations:
+      required: true

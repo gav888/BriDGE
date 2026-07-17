@@ -1,0 +1,233 @@
+---
+title: "Getting started with BriDGE"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with BriDGE}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 4.5
+)
+```
+
+## Why BriDGE?
+
+Randomized controlled trials (RCTs) tell you *whether* an intervention works.
+They are rarely designed to tell you *why and how* it works — which mediators
+carry the effect, whether relationships are nonlinear, and whether your
+theoretical causal model is actually consistent with the data.
+
+BriDGE implements the protocol described in the companion paper
+(Veltri & Banerjee, in press, *Behavior Research Methods*), combining:
+
+1. **A researcher's DAG** — your theoretical causal model of the experiment.
+2. **Causal discovery** — structure learning constrained by experimental
+   design facts (the randomized treatment can affect other variables, but
+   nothing can cause the treatment).
+3. **GAM-based mediation analysis** — direct and indirect effects estimated
+   with flexible smooth functions instead of rigid linear terms.
+4. **Bootstrap inference and sensitivity checks** — so effects come with
+   uncertainty and robustness information.
+
+This vignette walks through the full workflow on synthetic data where the
+ground truth is known.
+
+```{r setup, message = FALSE}
+library(BriDGE)
+```
+
+## 1. Data
+
+`bridge_generate_data()` generates a synthetic two-arm RCT with a binary
+`treatment`, two mediators, and a continuous `outcome`. The data-generating
+process deliberately includes nonlinearities (a quadratic mediator effect,
+a mediator–mediator interaction, and treatment-by-mediator interactions),
+mirroring the simulation study in the paper.
+
+```{r data}
+data <- bridge_generate_data(n = 500, nonlinear_strength = 0.5, seed = 42)
+head(data)
+```
+
+With your own data you need: a **two-level treatment factor** (the *first*
+factor level is taken as control, the second as treated), numeric mediators,
+a numeric outcome, and no missing values in the analysis variables:
+
+```{r own-data, eval = FALSE}
+your_data$treatment <- factor(your_data$group,
+                              levels = c("control", "treatment"))
+your_data <- na.omit(your_data)
+```
+
+## 2. Causal discovery: does the data agree with your DAG?
+
+`bridge_discover()` learns a DAG from the data while enforcing what we know
+by design: edges from the treatment to each mediator are whitelisted
+(randomization guarantees the treatment is upstream), and any edge *into*
+the treatment is blacklisted.
+
+```{r discover}
+discovery <- bridge_discover(
+  data      = data,
+  treatment = "treatment",
+  mediators = c("mediator_1", "mediator_2"),
+  outcome   = "outcome",
+  method    = "mmhc"   # also: "hc", "pc"
+)
+
+discovery$comparison
+```
+
+Each row is an edge; `Researcher` marks edges in your assumed DAG (treatment
+to each mediator and the outcome, each mediator to the outcome), `Discovered`
+marks edges the algorithm found. Read disagreements as **hypotheses to
+examine, not verdicts**: an edge the algorithm finds between mediators, for
+example, suggests your parallel-mediator theory may miss a mediator-to-mediator
+pathway. Discovery on discretized data is also sensitive to binning choices,
+so treat low-stability edges with caution (see the paper's discussion of
+arc-strength stability).
+
+You can plot both structures:
+
+```{r plot-dags, eval = FALSE}
+plot(discovery$researcher_dag)     # your theory
+plot(discovery$discovered_igraph)  # what the data suggests
+```
+
+## 3. Mediation analysis with GAMs
+
+`bridge_mediate()` decomposes the treatment effect using counterfactual
+prediction from an outcome GAM with smooth terms for each mediator:
+
+- **`direct_effect`** — the natural direct effect: treatment's effect on the
+  outcome holding mediators at their control-condition values.
+- **`nie_<mediator>`** — the indirect effect through each mediator: the
+  outcome change produced by shifting *that* mediator (and only that one)
+  from its control to its treated value.
+- **`total_effect`** — treatment's overall effect with all mediators
+  responding.
+
+Confidence intervals come from bootstrap resampling. We use a small number of
+bootstraps here to keep the vignette fast — use **500–2000** in real analyses.
+
+```{r mediate}
+mediation <- bridge_mediate(
+  data         = data,
+  treatment    = "treatment",
+  mediators    = c("mediator_1", "mediator_2"),
+  outcome      = "outcome",
+  n_bootstraps = 50,      # use >= 500 in practice
+  nonlinear    = TRUE,    # GAM smooths for mediator-outcome links
+  parallel     = FALSE,   # TRUE recommended on your machine
+  seed         = 42
+)
+
+for (effect in names(mediation$summaries)) {
+  s <- mediation$summaries[[effect]]
+  cat(sprintf("%-16s % .3f  [% .3f, % .3f]\n",
+              effect, s$mean, s$ci_lower, s$ci_upper))
+}
+```
+
+An interval that excludes zero indicates a reliable effect at the 95% level.
+Because the outcome model uses smooth terms, these estimates remain valid
+when mediator–outcome relationships are curved — exactly the situation where
+classic linear mediation (e.g., product-of-coefficients) can be biased.
+Setting `nonlinear = FALSE` re-runs everything with linear models, which is a
+useful comparison: if the two disagree, the nonlinearity matters.
+
+## 4. Sensitivity analysis
+
+`bridge_sensitivity()` adds small Gaussian noise to the mediators and outcome
+and re-runs the mediation. If your conclusions change under tiny
+perturbations, they were fragile to begin with.
+
+```{r sensitivity}
+sensitivity <- bridge_sensitivity(
+  data            = data,
+  treatment       = "treatment",
+  mediators       = c("mediator_1", "mediator_2"),
+  outcome         = "outcome",
+  n_bootstraps    = 25,
+  perturbation_sd = 0.1,
+  parallel        = FALSE,
+  seed            = 42
+)
+
+round(sapply(sensitivity$perturbed_results$summaries, `[[`, "mean"), 3)
+```
+
+Compare these means with the unperturbed ones above: they should be close.
+
+## 5. Everything at once
+
+`bridge_analyze()` runs the whole pipeline — discovery, mediation, group
+comparison, sensitivity, plots, and a text summary:
+
+```{r analyze}
+results <- bridge_analyze(
+  data         = data,
+  treatment    = "treatment",
+  mediators    = c("mediator_1", "mediator_2"),
+  outcome      = "outcome",
+  n_bootstraps = 50,     # use >= 500 in practice
+  parallel     = FALSE,
+  sensitivity  = FALSE,  # enabled by default; skipped here for speed
+  seed         = 42
+)
+
+summary(results)
+```
+
+The result object keeps every component: `results$discovery`,
+`results$mediation`, `results$comparison`, `results$plots`.
+
+```{r plots}
+results$plots$effect_sizes
+```
+
+```{r plots2}
+results$plots$bootstrap_distributions
+```
+
+## 6. Practical guidance
+
+- **Sample size**: mediation estimands need more power than average treatment
+  effects; aim for hundreds of observations, and treat discovery output on
+  small samples as exploratory.
+- **Bootstraps**: 500 minimum for stable percentile intervals; more for
+  publication.
+- **Convergence**: on small bootstrap samples GAMs occasionally struggle.
+  `handle_convergence = "simplify"` automatically falls back to simpler
+  models; `"error"` makes failures loud instead.
+- **Reproducibility**: pass `seed =` to make bootstrap draws reproducible,
+  and report it.
+- **When simpler tools suffice**: with one mediator, no interaction or
+  nonlinearity suspected, classic linear mediation may be all you need — see
+  the decision flowchart in the companion paper (Figure 1).
+
+## Reproducing the paper
+
+The full simulation scripts behind the companion paper (2-, 3-, and
+5-mediator scenarios, BCa intervals, arc-strength stability, benchmarking and
+power grids, and the JOBS II semi-synthetic benchmark) ship with the package:
+
+```{r sims, eval = FALSE}
+list.files(system.file("simulations", package = "BriDGE"))
+```
+
+## Citation
+
+```{r citation, eval = FALSE}
+citation("BriDGE")
+```
+
+> Veltri, G. A., & Banerjee, S. (in press). BriDGE the gap – improving
+> Behavioural research by integrating DAGs and GAMs in Experiments.
+> *Behavior Research Methods.*

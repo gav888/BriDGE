@@ -1,7 +1,7 @@
 Package: BriDGE
 Type: Package
 Title: Behavioural Research by Integrating DAGs and GAMs in Experiments
-Version: 1.0.0
+Version: 1.1.0
 Authors@R: c(
     person(
       "Giuseppe", "Veltri",
@@ -24,7 +24,7 @@ Description: Implements the BriDGE protocol for mechanistic causal analysis of
     Key features include support for multiple mediators, parallel processing,
     and integrated diagnostic tools for model validation.
 License: MIT + file LICENSE
-URL: https://github.com/gav888/BriDGE
+URL: https://github.com/gav888/BriDGE, https://gav888.github.io/BriDGE/
 BugReports: https://github.com/gav888/BriDGE/issues
 Depends:
     R (>= 3.5.0)
@@ -46,6 +46,7 @@ Suggests:
     rmarkdown,
     mediation,
     np
+VignetteBuilder: knitr
 Encoding: UTF-8
 Language: en-US
 Config/roxygen2/version: 8.0.0

@@ -1,6 +1,10 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^CITATION\.cff$
 ^HANDOFF\.md$
 ^bridge_examples\.r$
 ^Bridge icon\.png$
