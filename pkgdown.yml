@@ -3,7 +3,7 @@ pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   BriDGE: BriDGE.html
-last_built: 2026-07-17T07:32Z
+last_built: 2026-07-17T07:36Z
 urls:
   reference: https://gav888.github.io/BriDGE/reference
   article: https://gav888.github.io/BriDGE/articles
