@@ -23,13 +23,14 @@ Experiments. Behavior Research Methods.
     }
 
 Veltri, G. A. (2026). BriDGE: Behavioural Research by Integrating DAGs
-and GAMs in Experiments. R package version 1.0.0.
-https://github.com/gav888/BriDGE
+and GAMs in Experiments. R package version 1.1.0.
+https://doi.org/10.5281/zenodo.21407536
 
     @Manual{,
       title = {BriDGE: Behavioural Research by Integrating DAGs and GAMs in Experiments},
       author = {Giuseppe A. Veltri},
       year = {2026},
-      note = {R package version 1.0.0},
+      note = {R package version 1.1.0},
       url = {https://github.com/gav888/BriDGE},
+      doi = {10.5281/zenodo.21407536},
     }
