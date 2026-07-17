@@ -68,17 +68,40 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>BriDGE is a comprehensive R package for causal analysis of randomized controlled trial (RCT) data. It seamlessly integrates causal discovery through Directed Acyclic Graphs (DAGs) with flexible mediation analysis using Generalized Additive Models (GAMs), providing researchers with powerful tools to understand complex causal relationships in behavioral experiments.</p>
+<p>BriDGE is an R package for causal analysis of randomized controlled trial (RCT) data. It integrates causal discovery through Directed Acyclic Graphs (DAGs) with flexible mediation analysis using Generalized Additive Models (GAMs), so that researchers can move beyond average treatment effects and study the mechanisms behind them.</p>
 <p>BriDGE is the companion package to the paper:</p>
 <blockquote>
 <p>Veltri, G. A., &amp; Banerjee, S. (in press). <strong>BriDGE the gap – improving Behavioural research by integrating DAGs and GAMs in Experiments.</strong> <em>Behavior Research Methods.</em></p>
 </blockquote>
-<p>While RCTs provide reliable evidence for intervention efficacy, they are seldom designed to reveal the causal pathways that drive observed outcomes. BriDGE bridges the gap from “what works” to “why and how it works”.</p>
+<p>A well-run RCT answers one question with high confidence: <em>did the intervention work?</em> It usually leaves a second, equally important question untouched: <em>why did it work</em> — or fail to? Which of the mediators you measured actually carried the effect? Is the mediator–outcome relationship linear, or does it flatten, accelerate, or interact with the treatment? And is the causal structure you assumed when designing the study actually consistent with the data you collected? These questions matter for theory building, for tuning an intervention before scaling it, and for anticipating why an effect that worked in one population might not replicate in another.</p>
+<p>BriDGE addresses them by combining three ingredients that are rarely used together in applied behavioral research. First, it treats your theoretical causal model — the researcher’s DAG — as an explicit, testable object rather than an implicit assumption. Second, it runs a causal discovery algorithm over the same data, constrained by what randomization guarantees (treatment can influence downstream variables; nothing can influence treatment), and compares the discovered structure against your theory. Where the two disagree, you get a concrete, data-driven hypothesis to examine rather than a silent modeling assumption. Third, it estimates direct and indirect (mediated) effects using GAMs, whose smooth terms accommodate the nonlinear relationships that behavioral data routinely contain and that classic linear mediation analysis can get badly wrong. Every effect estimate comes with bootstrap confidence intervals, and a perturbation-based sensitivity analysis tells you how fragile the conclusions are.</p>
 <p align="center">
 <img src="reference/figures/README-dag-comparison.png" width="700" alt="Researcher's assumed DAG next to the DAG discovered from the data, with disagreeing edges highlighted"></p>
 <p align="center">
 <em>BriDGE contrasts your theoretical causal model (left) with the structure discovered from the data under experimental constraints (right); disagreeing edges (highlighted) become hypotheses to examine.</em>
 </p>
+</div>
+<div class="section level2">
+<h2 id="how-bridge-works">How BriDGE works<a class="anchor" aria-label="anchor" href="#how-bridge-works"></a>
+</h2>
+<p>The package implements the analysis stages of the BriDGE protocol described in the paper. A typical run of <code><a href="reference/bridge_analyze.html">bridge_analyze()</a></code> walks through them in order:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Formalize your theory.</strong> Your assumptions — treatment affects each mediator, each mediator affects the outcome, treatment may also act directly — are encoded as the <em>researcher’s DAG</em>.</li>
+<li>
+<strong>Interrogate it with causal discovery.</strong> A structure-learning algorithm (MMHC by default; hill-climbing and PC-stable are available) learns a DAG from the data. Experimental design knowledge is enforced: edges from treatment to mediators are whitelisted, and edges <em>into</em> the randomized treatment are forbidden. The output is an edge-by-edge comparison between the discovered structure and your theory. Agreements corroborate your model; disagreements — an unexpected mediator-to-mediator link, a missing pathway — are flagged for scrutiny.</li>
+<li>
+<strong>Estimate effects flexibly.</strong> Mediation analysis decomposes the total treatment effect into a direct effect and one indirect effect per mediator, using counterfactual prediction from an outcome GAM with smooth mediator terms. Setting <code>nonlinear = FALSE</code> re-runs everything with linear models, which makes for a useful robustness comparison: if the two disagree, the nonlinearity is doing real work.</li>
+<li>
+<strong>Quantify uncertainty and robustness.</strong> Effects are bootstrapped (reproducibly, via the <code>seed</code> argument), and a sensitivity analysis re-estimates everything on slightly perturbed data. Conclusions that survive both are worth reporting.</li>
+</ol>
+<p>The result is not a black-box verdict but a structured body of evidence: what your theory predicted, what the data suggest instead, how large each causal pathway is, and how much you should trust those numbers.</p>
+</div>
+<div class="section level2">
+<h2 id="when-to-use-bridge-and-when-not-to">When to use BriDGE (and when not to)<a class="anchor" aria-label="anchor" href="#when-to-use-bridge-and-when-not-to"></a>
+</h2>
+<p>BriDGE is designed for experiments with a <strong>mechanistic question</strong>: you measured one or more candidate mediators and want to know how much of the treatment effect flows through each. It earns its complexity when several mediators are in play, when nonlinear mediator–outcome relationships or treatment-by-mediator interactions are plausible, and when the sample is large enough to support them (as a rule of thumb, several hundred observations).</p>
+<p>If you have a single mediator, firmly linear relationships, and a small sample, classic linear mediation or SEM may serve you better — though even then, drawing the DAG and running the discovery step costs little and can reveal surprises. The companion paper (Figure 1) provides a full decision flowchart, including experimental-design considerations (mediator timing, measurement quality, power) that no statistical method can compensate for after the fact.</p>
 <div class="section level3">
 <h3 id="key-features">Key Features<a class="anchor" aria-label="anchor" href="#key-features"></a>
 </h3>
@@ -434,7 +457,7 @@
 <li><a href="https://github.com/gav888/BriDGE/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/gav888/BriDGE/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://github.com/gav888/BriDGE/actions/workflows/test-coverage.yaml" class="external-link"><img src="https://img.shields.io/badge/coverage-82%25-brightgreen.svg" alt="test coverage"></a></li>
 <li><a href="https://opensource.org/licenses/MIT" class="external-link"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a></li>
-<li><a href="https://doi.org/10.5281/zenodo.21407536" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.21407536.svg" alt="DOI"></a></li>
+<li><a href="https://doi.org/10.5281/zenodo.21407536" class="external-link"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21407536-blue.svg" alt="DOI"></a></li>
 </ul>
 </div>
 

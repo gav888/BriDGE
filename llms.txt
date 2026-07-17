@@ -6,12 +6,11 @@
 
 ## Overview
 
-BriDGE is a comprehensive R package for causal analysis of randomized
-controlled trial (RCT) data. It seamlessly integrates causal discovery
-through Directed Acyclic Graphs (DAGs) with flexible mediation analysis
-using Generalized Additive Models (GAMs), providing researchers with
-powerful tools to understand complex causal relationships in behavioral
-experiments.
+BriDGE is an R package for causal analysis of randomized controlled
+trial (RCT) data. It integrates causal discovery through Directed
+Acyclic Graphs (DAGs) with flexible mediation analysis using Generalized
+Additive Models (GAMs), so that researchers can move beyond average
+treatment effects and study the mechanisms behind them.
 
 BriDGE is the companion package to the paper:
 
@@ -19,10 +18,32 @@ BriDGE is the companion package to the paper:
 > Behavioural research by integrating DAGs and GAMs in Experiments.**
 > *Behavior Research Methods.*
 
-While RCTs provide reliable evidence for intervention efficacy, they are
-seldom designed to reveal the causal pathways that drive observed
-outcomes. BriDGE bridges the gap from “what works” to “why and how it
-works”.
+A well-run RCT answers one question with high confidence: *did the
+intervention work?* It usually leaves a second, equally important
+question untouched: *why did it work* — or fail to? Which of the
+mediators you measured actually carried the effect? Is the
+mediator–outcome relationship linear, or does it flatten, accelerate, or
+interact with the treatment? And is the causal structure you assumed
+when designing the study actually consistent with the data you
+collected? These questions matter for theory building, for tuning an
+intervention before scaling it, and for anticipating why an effect that
+worked in one population might not replicate in another.
+
+BriDGE addresses them by combining three ingredients that are rarely
+used together in applied behavioral research. First, it treats your
+theoretical causal model — the researcher’s DAG — as an explicit,
+testable object rather than an implicit assumption. Second, it runs a
+causal discovery algorithm over the same data, constrained by what
+randomization guarantees (treatment can influence downstream variables;
+nothing can influence treatment), and compares the discovered structure
+against your theory. Where the two disagree, you get a concrete,
+data-driven hypothesis to examine rather than a silent modeling
+assumption. Third, it estimates direct and indirect (mediated) effects
+using GAMs, whose smooth terms accommodate the nonlinear relationships
+that behavioral data routinely contain and that classic linear mediation
+analysis can get badly wrong. Every effect estimate comes with bootstrap
+confidence intervals, and a perturbation-based sensitivity analysis
+tells you how fragile the conclusions are.
 
 ![Researcher's assumed DAG next to the DAG discovered from the data,
 with disagreeing edges
@@ -31,6 +52,59 @@ highlighted](reference/figures/README-dag-comparison.png)
 *BriDGE contrasts your theoretical causal model (left) with the
 structure discovered from the data under experimental constraints
 (right); disagreeing edges (highlighted) become hypotheses to examine.*
+
+## How BriDGE works
+
+The package implements the analysis stages of the BriDGE protocol
+described in the paper. A typical run of
+[`bridge_analyze()`](https://gav888.github.io/BriDGE/reference/bridge_analyze.md)
+walks through them in order:
+
+1.  **Formalize your theory.** Your assumptions — treatment affects each
+    mediator, each mediator affects the outcome, treatment may also act
+    directly — are encoded as the *researcher’s DAG*.
+2.  **Interrogate it with causal discovery.** A structure-learning
+    algorithm (MMHC by default; hill-climbing and PC-stable are
+    available) learns a DAG from the data. Experimental design knowledge
+    is enforced: edges from treatment to mediators are whitelisted, and
+    edges *into* the randomized treatment are forbidden. The output is
+    an edge-by-edge comparison between the discovered structure and your
+    theory. Agreements corroborate your model; disagreements — an
+    unexpected mediator-to-mediator link, a missing pathway — are
+    flagged for scrutiny.
+3.  **Estimate effects flexibly.** Mediation analysis decomposes the
+    total treatment effect into a direct effect and one indirect effect
+    per mediator, using counterfactual prediction from an outcome GAM
+    with smooth mediator terms. Setting `nonlinear = FALSE` re-runs
+    everything with linear models, which makes for a useful robustness
+    comparison: if the two disagree, the nonlinearity is doing real
+    work.
+4.  **Quantify uncertainty and robustness.** Effects are bootstrapped
+    (reproducibly, via the `seed` argument), and a sensitivity analysis
+    re-estimates everything on slightly perturbed data. Conclusions that
+    survive both are worth reporting.
+
+The result is not a black-box verdict but a structured body of evidence:
+what your theory predicted, what the data suggest instead, how large
+each causal pathway is, and how much you should trust those numbers.
+
+## When to use BriDGE (and when not to)
+
+BriDGE is designed for experiments with a **mechanistic question**: you
+measured one or more candidate mediators and want to know how much of
+the treatment effect flows through each. It earns its complexity when
+several mediators are in play, when nonlinear mediator–outcome
+relationships or treatment-by-mediator interactions are plausible, and
+when the sample is large enough to support them (as a rule of thumb,
+several hundred observations).
+
+If you have a single mediator, firmly linear relationships, and a small
+sample, classic linear mediation or SEM may serve you better — though
+even then, drawing the DAG and running the discovery step costs little
+and can reveal surprises. The companion paper (Figure 1) provides a full
+decision flowchart, including experimental-design considerations
+(mediator timing, measurement quality, power) that no statistical method
+can compensate for after the fact.
 
 ### Key Features
 
