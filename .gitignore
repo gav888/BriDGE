@@ -50,3 +50,6 @@ rsconnect/
 
 # macOS
 .DS_Store
+
+# Internal development notes (local machine paths)
+HANDOFF.md
