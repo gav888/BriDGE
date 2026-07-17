@@ -7,7 +7,7 @@
 [![R-CMD-check](https://github.com/gav888/BriDGE/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gav888/BriDGE/actions/workflows/R-CMD-check.yaml)
 [![test coverage](https://img.shields.io/badge/coverage-82%25-brightgreen.svg)](https://github.com/gav888/BriDGE/actions/workflows/test-coverage.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![DOI](https://zenodo.org/badge/988990697.svg)](https://zenodo.org/badge/latestdoi/988990697)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21407536.svg)](https://doi.org/10.5281/zenodo.21407536)
 <!-- badges: end -->
 
 📖 **Documentation & tutorial**: <https://gav888.github.io/BriDGE/>
