@@ -305,4 +305,4 @@ Copyright (c) 2026 Giuseppe A. Veltri
 
 ## News
 
-See [NEWS.md](NEWS.md) for the changelog. Current release: **v1.0.0**, the first public release accompanying the accepted paper.
+See [NEWS.md](NEWS.md) for the changelog and the [releases page](https://github.com/gav888/BriDGE/releases) for the latest version.

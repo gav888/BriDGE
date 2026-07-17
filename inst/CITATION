@@ -22,11 +22,12 @@ bibentry(
   title    = "BriDGE: Behavioural Research by Integrating DAGs and GAMs in Experiments",
   author   = person("Giuseppe A.", "Veltri"),
   year     = "2026",
-  note     = "R package version 1.0.0",
+  note     = sprintf("R package version %s", meta$Version),
   url      = "https://github.com/gav888/BriDGE",
-  textVersion = paste(
+  doi      = "10.5281/zenodo.21407536",
+  textVersion = sprintf(paste(
     "Veltri, G. A. (2026).",
     "BriDGE: Behavioural Research by Integrating DAGs and GAMs in Experiments.",
-    "R package version 1.0.0. https://github.com/gav888/BriDGE"
-  )
+    "R package version %s. https://doi.org/10.5281/zenodo.21407536"
+  ), meta$Version)
 )
