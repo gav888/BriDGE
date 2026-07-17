@@ -15,7 +15,8 @@ bridge_sensitivity(
   perturbation_sd = 0.1,
   handle_convergence = "warn",
   gam_maxit = 200,
-  gam_epsilon = 1e-07
+  gam_epsilon = 1e-07,
+  seed = 123
 )
 }
 \arguments{
@@ -40,6 +41,8 @@ bridge_sensitivity(
 \item{gam_maxit}{Integer specifying maximum iterations for GAM fitting}
 
 \item{gam_epsilon}{Numeric specifying convergence tolerance for GAM fitting}
+
+\item{seed}{Integer base seed for reproducible perturbation and bootstrap resampling (default: 123)}
 }
 \value{
 A list containing sensitivity analysis results

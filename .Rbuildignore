@@ -1,0 +1,8 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.github$
+^HANDOFF\.md$
+^bridge_examples\.r$
+^Bridge icon\.png$
+^LICENSE\.md$
+^\.DS_Store$

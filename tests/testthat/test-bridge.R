@@ -1,11 +1,5 @@
 # BriDGE Package - Unit Tests
 # ===========================
-#
-# This file contains unit tests for the BriDGE package using testthat
-# Place this file in tests/testthat/ directory of the package
-
-library(testthat)
-library(BriDGE)
 
 # =============================================================================
 # Test Data Generation
@@ -523,14 +517,3 @@ test_that("functions complete in reasonable time", {
   expect_lt(as.numeric(end_time - start_time, units = "secs"), 30)
 })
 
-# =============================================================================
-# Run Tests
-# =============================================================================
-
-# To run these tests, use:
-# devtools::test()
-# or
-# testthat::test_dir("tests/testthat/")
-
-cat("BriDGE package unit tests defined.\n")
-cat("Run with: devtools::test() or testthat::test_dir('tests/testthat/')\n")

@@ -4,7 +4,7 @@
 \name{BriDGE-package}
 \alias{BriDGE}
 \alias{BriDGE-package}
-\title{BriDGE:Behavioural research by integrating DAGs and GAMs in Experiments}
+\title{BriDGE: Behavioural research by integrating DAGs and GAMs in Experiments}
 \description{
 A comprehensive package for causal analysis of randomized controlled trial data.
 }
@@ -15,13 +15,18 @@ bootstrapping, sensitivity analysis, and visualization tools.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/gaveltri/BriDGE}
-  \item Report bugs at \url{https://github.com/gaveltri/BriDGE/issues}
+  \item \url{https://github.com/gav888/BriDGE}
+  \item Report bugs at \url{https://github.com/gav888/BriDGE/issues}
 }
 
 }
 \author{
 \strong{Maintainer}: Giuseppe Veltri \email{gaveltri@nus.edu.sg} (\href{https://orcid.org/0000-0002-9472-2236}{ORCID})
+
+Authors:
+\itemize{
+  \item Giuseppe Veltri \email{gaveltri@nus.edu.sg} (\href{https://orcid.org/0000-0002-9472-2236}{ORCID})
+}
 
 }
 \keyword{internal}
