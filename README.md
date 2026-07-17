@@ -4,6 +4,7 @@
 </p>
 
 <!-- badges: start -->
+[![version](https://img.shields.io/github/v/release/gav888/BriDGE?label=version&color=blue)](https://github.com/gav888/BriDGE/releases)
 [![R-CMD-check](https://github.com/gav888/BriDGE/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gav888/BriDGE/actions/workflows/R-CMD-check.yaml)
 [![test coverage](https://img.shields.io/badge/coverage-82%25-brightgreen.svg)](https://github.com/gav888/BriDGE/actions/workflows/test-coverage.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
