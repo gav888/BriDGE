@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/gav888/BriDGE/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/gav888/BriDGE/blob/v1.1.0/inst/CITATION)
 
 Veltri, G. A., & Banerjee, S. (2026, in press). BriDGE the gap -
 improving Behavioural research by integrating DAGs and GAMs in
