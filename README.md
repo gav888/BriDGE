@@ -1,41 +1,38 @@
-# BriDGE: Behavioural research by integrating DAGs and GAMs in Experiments
+# BriDGE: Behavioural Research by Integrating DAGs and GAMs in Experiments
+<p align="center">
+  <img src="Bridge icon.png" width="400" alt="BriDGE Logo"/>
+</p>
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/gav888/BriDGE/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gav888/BriDGE/actions/workflows/R-CMD-check.yaml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <!-- badges: end -->
 
-BriDGE is an R package for mechanistic causal analysis of randomized controlled
-trial (RCT) data. It implements the BriDGE protocol described in the companion
-paper:
+## Overview
 
-> Veltri, G. A., & Banerjee, S. (in press). **BriDGE the gap – improving
-> Behavioural research by integrating DAGs and GAMs in Experiments.**
-> *Behavior Research Methods.*
+BriDGE is a comprehensive R package for causal analysis of randomized controlled trial (RCT) data. It seamlessly integrates causal discovery through Directed Acyclic Graphs (DAGs) with flexible mediation analysis using Generalized Additive Models (GAMs), providing researchers with powerful tools to understand complex causal relationships in behavioral experiments.
 
-While RCTs provide reliable evidence for intervention efficacy, they are seldom
-designed to reveal the causal pathways that drive observed outcomes. BriDGE
-bridges the gap from "what works" to "why and how it works" by combining
-Directed Acyclic Graphs (DAGs), causal discovery algorithms, and Generalized
-Additive Models (GAMs).
+BriDGE is the companion package to the paper:
 
-## Features
+> Veltri, G. A., & Banerjee, S. (in press). **BriDGE the gap – improving Behavioural research by integrating DAGs and GAMs in Experiments.** *Behavior Research Methods.*
 
-- **Causal Discovery**: Learn causal structures from data using structure
-  learning algorithms (MMHC, HC, PC-stable via `bnlearn`), with experimental
-  design knowledge enforced through whitelists (treatment → mediators) and
-  blacklists (no edges into the randomized treatment)
-- **Mediation Analysis**: Estimate direct and indirect effects through multiple
-  mediators using GAMs (`mgcv`), capturing nonlinear relationships
-- **Bootstrapping**: Uncertainty quantification through bootstrap resampling,
-  with reproducible seeding
-- **Sensitivity Analysis**: Test robustness of results to data perturbations
-- **Visualization**: Plots for bootstrap distributions and effect sizes
-- **Parallel Processing**: Efficient computation across cores
+While RCTs provide reliable evidence for intervention efficacy, they are seldom designed to reveal the causal pathways that drive observed outcomes. BriDGE bridges the gap from "what works" to "why and how it works".
+
+### Key Features
+
+- 🔍 **Causal Discovery**: Multiple algorithms (MMHC, HC, PC-stable) to learn causal structures from data, with experimental design knowledge enforced through whitelists (treatment → mediators) and blacklists (no edges into the randomized treatment)
+- 📊 **Flexible Mediation Analysis**: Handles nonlinear relationships using GAMs with automatic smoothing
+- 🔄 **Bootstrap Inference**: Robust uncertainty quantification through parallel bootstrapping, with reproducible seeding
+- 🎯 **Sensitivity Analysis**: Assess robustness of findings to data perturbations
+- 📈 **Comprehensive Visualization**: Publication-ready plots for all analysis components
+- ⚡ **Parallel Processing**: Efficient computation for large-scale analyses
+- 🛡️ **Robust Error Handling**: Graceful handling of convergence issues and edge cases
 
 ## Installation
 
+### Development Version from GitHub
+
 ```r
-# Install development version from GitHub
 # install.packages("devtools")
 devtools::install_github("gav888/BriDGE")
 ```
@@ -45,124 +42,239 @@ devtools::install_github("gav888/BriDGE")
 ```r
 library(BriDGE)
 
-# Generate example data
-data <- bridge_generate_data(n = 1000)
+# Generate example RCT data with nonlinear relationships
+data <- bridge_generate_data(n = 1000, nonlinear_strength = 0.5)
 
-# Perform complete causal analysis
+# Run complete causal analysis pipeline
 results <- bridge_analyze(
   data = data,
   treatment = "treatment",
   mediators = c("mediator_1", "mediator_2"),
   outcome = "outcome",
-  n_bootstraps = 500
+  n_bootstraps = 500,
+  parallel = TRUE
 )
 
-# View summary
+# View results
 print(results)
 summary(results)
-
-# Create plots
 plot(results)
 ```
 
-## Main Functions
+## Detailed Usage
 
-| Function | Purpose |
-|---|---|
-| `bridge_analyze()` | Complete pipeline: discovery → mediation → comparison → sensitivity → plots → summary |
-| `bridge_discover()` | Constrained causal discovery (`method = "mmhc"`, `"hc"`, or `"pc"`) and comparison with the researcher's assumed DAG |
-| `bridge_mediate()` | GAM-based mediation analysis with bootstrap confidence intervals |
-| `bridge_sensitivity()` | Robustness check under Gaussian perturbation of mediators and outcome |
-| `bridge_compare()` | Treatment vs control group means for mediators and outcome |
-| `bridge_plot()` | Bootstrap-distribution and effect-size plots |
-| `bridge_summary()` | Formatted text summary of all results |
-| `bridge_generate_data()` | Synthetic RCT data with nonlinear mediation structure, for examples and testing |
+### 1. Causal Discovery
 
-## Working with Your Own Data
+Discover causal relationships from your data using various algorithms:
 
 ```r
-your_data <- read.csv("your_rct_data.csv")
-
-# Treatment must be a two-level variable; the FIRST factor level is taken as
-# control and the SECOND as treated. Both of these work:
-your_data$treatment <- factor(your_data$treatment)                          # 0/1
-your_data$treatment <- factor(your_data$group,
-                              levels = c("control", "treatment"))           # labels
-
-results <- bridge_analyze(
-  data = your_data,
+discovery_results <- bridge_discover(
+  data = data,
   treatment = "treatment",
-  mediators = c("mediator1", "mediator2", "mediator3"),
+  mediators = c("mediator_1", "mediator_2"),
   outcome = "outcome",
-  n_bootstraps = 500,
-  seed = 42   # reproducible bootstrap
+  method = "mmhc"  # Options: "mmhc", "hc", "pc"
+)
+
+# Compare discovered DAG with theoretical expectations
+plot(discovery_results$researcher_dag)
+plot(discovery_results$discovered_igraph)
+```
+
+### 2. Mediation Analysis
+
+Perform mediation analysis with support for nonlinear relationships:
+
+```r
+mediation_results <- bridge_mediate(
+  data = data,
+  treatment = "treatment",
+  mediators = c("mediator_1", "mediator_2"),
+  outcome = "outcome",
+  n_bootstraps = 1000,
+  nonlinear = TRUE,                 # Use GAMs for flexible modeling
+  handle_convergence = "simplify",  # Options: "warn", "simplify", "error"
+  seed = 42                         # Reproducible bootstrap
+)
+
+# Extract specific effects
+direct_effect <- mediation_results$summaries$direct_effect
+indirect_effect_m1 <- mediation_results$summaries$nie_mediator_1
+```
+
+### 3. Sensitivity Analysis
+
+Assess the robustness of your findings:
+
+```r
+sensitivity_results <- bridge_sensitivity(
+  data = data,
+  treatment = "treatment",
+  mediators = c("mediator_1", "mediator_2"),
+  outcome = "outcome",
+  perturbation_sd = 0.1
 )
 ```
 
-### Data requirements
+### 4. Visualization
 
-- **Sample size**: at least 200 observations recommended (more for stable
-  discovery and mediation of subtle effects)
+Create publication-ready visualizations:
+
+```r
+# Generate all plots
+plots <- bridge_plot(
+  discovery_results = discovery_results,
+  mediation_results = mediation_results,
+  data = data,
+  treatment = "treatment",
+  mediators = c("mediator_1", "mediator_2"),
+  outcome = "outcome"
+)
+
+# Access specific plots
+plots$effect_sizes
+plots$bootstrap_distributions
+```
+
+## Working with Your Own Data
+
+The treatment variable must have exactly two levels; the **first factor level is taken as control** and the second as treated. Both numeric and labeled codings work:
+
+```r
+your_data$treatment <- factor(your_data$treatment)                    # 0/1
+your_data$treatment <- factor(your_data$group,
+                              levels = c("control", "treatment"))     # labels
+```
+
+Data requirements:
+
+- **Sample size**: at least 200 observations recommended
 - **Treatment**: binary factor (exactly two levels)
 - **Mediators**: continuous or discrete
 - **Outcome**: continuous
-- **Missing data**: complete cases required — remove or impute first
-  (`na.omit(data)`)
+- **Missing data**: complete cases required — remove or impute first (`na.omit(data)`)
 
-## Interpreting Results
+## Main Functions
 
-- **DAG agreement**: overlap between the discovered structure and your assumed
-  DAG; disagreements flag pathways worth re-examining rather than definitive
-  causal claims
-- **Direct effect**: treatment effect on the outcome not flowing through the
-  specified mediators
-- **Indirect effects (`nie_*`)**: treatment effect transmitted through each
-  mediator
-- **Total effect**: overall treatment effect with all mediators responding
-- **Confidence intervals**: 95% bootstrap intervals
-- **Sensitivity analysis**: stability of the estimates under small data
-  perturbations
+| Function | Description |
+|----------|-------------|
+| `bridge_analyze()` | Complete analysis pipeline wrapper |
+| `bridge_discover()` | Causal discovery from data |
+| `bridge_mediate()` | Mediation analysis with bootstrapping |
+| `bridge_sensitivity()` | Sensitivity analysis |
+| `bridge_compare()` | Group comparison statistics |
+| `bridge_plot()` | Generate visualizations |
+| `bridge_summary()` | Create analysis summary |
+| `bridge_generate_data()` | Generate synthetic RCT data |
+
+## Advanced Options
+
+### Handling Convergence Issues
+
+```r
+# Strict convergence requirements
+results <- bridge_analyze(
+  data = data,
+  treatment = "treatment",
+  mediators = mediators,
+  outcome = "outcome",
+  handle_convergence = "error",
+  gam_maxit = 500,
+  gam_epsilon = 1e-8
+)
+
+# Automatic model simplification
+results <- bridge_analyze(
+  data = data,
+  treatment = "treatment",
+  mediators = mediators,
+  outcome = "outcome",
+  handle_convergence = "simplify"
+)
+```
+
+### Parallel Processing
+
+```r
+# Utilize multiple cores for faster computation
+results <- bridge_analyze(
+  data = data,
+  treatment = "treatment",
+  mediators = mediators,
+  outcome = "outcome",
+  parallel = TRUE,  # Auto-detects available cores
+  n_bootstraps = 2000
+)
+```
 
 ## Reproducing the Paper
 
-The simulation scripts that generated the results in the companion paper
-(synthetic scenarios with 2, 3, and 5 mediators, and the JOBS II semi-synthetic
-benchmark) ship with the package:
+The simulation scripts that generated the results in the companion paper (synthetic scenarios with 2, 3, and 5 mediators, and the JOBS II semi-synthetic benchmark) ship with the package:
 
 ```r
 list.files(system.file("simulations", package = "BriDGE"))
 ```
 
-See `inst/simulations/README.md` for details. The scripts are self-contained
-and long-running with default settings.
-
-## Performance Considerations
-
-- Use `parallel = TRUE` (default) for faster computation
-- Reduce `n_bootstraps` during exploration; increase (≥ 1000) for final results
-- `handle_convergence = "simplify"` falls back to simpler models when GAM
-  fitting struggles on small bootstrap samples
+See [`inst/simulations/README.md`](inst/simulations/README.md) for details. The scripts are self-contained and long-running with default settings.
 
 ## Citation
+
+If you use BriDGE in your research, please cite the companion paper:
+
+> Veltri, G. A., & Banerjee, S. (in press). BriDGE the gap – improving Behavioural research by integrating DAGs and GAMs in Experiments. *Behavior Research Methods.*
 
 ```r
 citation("BriDGE")
 ```
 
-> Veltri, G. A., & Banerjee, S. (in press). BriDGE the gap – improving
-> Behavioural research by integrating DAGs and GAMs in Experiments.
-> *Behavior Research Methods.*
+```bibtex
+@article{veltri2026bridge,
+  author  = {Veltri, Giuseppe A. and Banerjee, Sanchayna},
+  title   = {BriDGE the gap -- improving Behavioural research by integrating DAGs and GAMs in Experiments},
+  journal = {Behavior Research Methods},
+  year    = {2026},
+  note    = {In press}
+}
+```
 
 ## Contributing
 
-Contributions are welcome — please open an issue or submit a Pull Request at
-<https://github.com/gav888/BriDGE>.
+Contributions are welcome — please open an issue or submit a Pull Request.
+
+### Development
+
+```r
+# Install development dependencies
+devtools::install_deps(dependencies = TRUE)
+
+# Run tests
+devtools::test()
+
+# Check package
+devtools::check()
+```
+
+## Requirements
+
+- R (>= 3.5.0)
+- Dependencies: `bnlearn`, `mgcv`, `ggplot2`, `dplyr`, `igraph`, `boot`, `parallel`, `Hmisc`
 
 ## License
 
-MIT © Giuseppe A. Veltri. See `LICENSE.md` for details.
+This project is licensed under the MIT License — see the [LICENSE.md](LICENSE.md) file for details.
+
+Copyright (c) 2026 Giuseppe A. Veltri
+
+## Acknowledgments
+
+- Built on top of excellent R packages including `bnlearn` for causal discovery and `mgcv` for GAM fitting
+- Inspired by modern causal inference methodologies in behavioral research
 
 ## Support
 
-- Open an issue: <https://github.com/gav888/BriDGE/issues>
-- Email: <gaveltri@nus.edu.sg>
+- 📧 Email: [gaveltri@nus.edu.sg](mailto:gaveltri@nus.edu.sg)
+- 🐛 Issues: [GitHub Issues](https://github.com/gav888/BriDGE/issues)
+
+## News
+
+See [NEWS.md](NEWS.md) for the changelog. Current release: **v1.0.0**, the first public release accompanying the accepted paper.
