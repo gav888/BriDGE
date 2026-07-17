@@ -1,0 +1,32 @@
+citHeader("To cite BriDGE in publications, please use:")
+
+bibentry(
+  bibtype  = "Article",
+  title    = "BriDGE the gap -- improving Behavioural research by integrating DAGs and GAMs in Experiments",
+  author   = c(
+    person("Giuseppe A.", "Veltri"),
+    person("Sanchayna", "Banerjee")
+  ),
+  journal  = "Behavior Research Methods",
+  year     = "2026",
+  note     = "In press",
+  textVersion = paste(
+    "Veltri, G. A., & Banerjee, S. (2026, in press).",
+    "BriDGE the gap - improving Behavioural research by integrating DAGs and GAMs in Experiments.",
+    "Behavior Research Methods."
+  )
+)
+
+bibentry(
+  bibtype  = "Manual",
+  title    = "BriDGE: Behavioural Research by Integrating DAGs and GAMs in Experiments",
+  author   = person("Giuseppe A.", "Veltri"),
+  year     = "2026",
+  note     = "R package version 1.0.0",
+  url      = "https://github.com/gav888/BriDGE",
+  textVersion = paste(
+    "Veltri, G. A. (2026).",
+    "BriDGE: Behavioural Research by Integrating DAGs and GAMs in Experiments.",
+    "R package version 1.0.0. https://github.com/gav888/BriDGE"
+  )
+)

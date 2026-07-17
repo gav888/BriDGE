@@ -17,7 +17,8 @@ bridge_analyze(
   sensitivity = TRUE,
   handle_convergence = "warn",
   gam_maxit = 200,
-  gam_epsilon = 1e-07
+  gam_epsilon = 1e-07,
+  seed = 123
 )
 }
 \arguments{
@@ -46,6 +47,8 @@ bridge_analyze(
 \item{gam_maxit}{Integer specifying maximum iterations for GAM fitting (default: 200)}
 
 \item{gam_epsilon}{Numeric specifying convergence tolerance for GAM fitting (default: 1e-7)}
+
+\item{seed}{Integer base seed for reproducible bootstrap resampling (default: 123)}
 }
 \value{
 A list containing all analysis results and plots

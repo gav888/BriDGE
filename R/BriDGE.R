@@ -2,7 +2,7 @@
 #by integrating DAGs and GAMs in Experiments
 # Main Package Functions
 
-#' BriDGE:Behavioural research by integrating DAGs and GAMs in Experiments
+#' BriDGE: Behavioural research by integrating DAGs and GAMs in Experiments
 #'
 #' @description A comprehensive package for causal analysis of randomized controlled trial data.
 #' @details It features causal discovery, mediation analysis with nonlinear relationships using GAMs,
@@ -15,7 +15,7 @@
 #' @import dplyr
 #' @importFrom bnlearn mmhc amat hc pc.stable
 #' @importFrom mgcv gam gam.check gam.control
-#' @importFrom igraph graph graph_from_adjacency_matrix plot.igraph as_edgelist
+#' @importFrom igraph make_graph graph_from_adjacency_matrix plot.igraph as_edgelist
 #' @importFrom boot boot
 #' @importFrom parallel detectCores makeCluster stopCluster parLapply clusterExport clusterEvalQ
 #' @importFrom Hmisc cut2
@@ -58,6 +58,19 @@ validate_data <- function(data, variables) {
   return(TRUE)
 }
 
+# Helper function to extract and validate treatment levels (internal).
+# The first level is treated as control, the second as treated, following
+# factor level order (e.g. "0"/"1" or "control"/"treatment").
+get_treatment_levels <- function(treatment_var, treatment_name) {
+  t_levels <- levels(as.factor(treatment_var))
+  if (length(t_levels) != 2) {
+    stop(paste0("Treatment variable '", treatment_name,
+                "' must have exactly 2 levels (control, treated); found: ",
+                paste(t_levels, collapse = ", ")))
+  }
+  t_levels
+}
+
 #' Complete Causal Analysis Pipeline
 #'
 #' Main wrapper function that performs a complete causal analysis pipeline including
@@ -76,6 +89,7 @@ validate_data <- function(data, variables) {
 #' @param handle_convergence Character string specifying how to handle convergence issues ("warn", "simplify", "error")
 #' @param gam_maxit Integer specifying maximum iterations for GAM fitting (default: 200)
 #' @param gam_epsilon Numeric specifying convergence tolerance for GAM fitting (default: 1e-7)
+#' @param seed Integer base seed for reproducible bootstrap resampling (default: 123)
 #'
 #' @return A list containing all analysis results and plots
 #' @export
@@ -109,7 +123,8 @@ bridge_analyze <- function(data,
                            sensitivity = TRUE,
                            handle_convergence = "warn",
                            gam_maxit = 200,
-                           gam_epsilon = 1e-7) {
+                           gam_epsilon = 1e-7,
+                           seed = 123) {
 
   # Input validation
   required_vars <- c(treatment, mediators, outcome)
@@ -144,7 +159,8 @@ bridge_analyze <- function(data,
     parallel = parallel,
     handle_convergence = handle_convergence,
     gam_maxit = gam_maxit,
-    gam_epsilon = gam_epsilon
+    gam_epsilon = gam_epsilon,
+    seed = seed
   )
 
   # 3. Comparative Analysis
@@ -170,7 +186,8 @@ bridge_analyze <- function(data,
       parallel = parallel,
       handle_convergence = handle_convergence,
       gam_maxit = gam_maxit,
-      gam_epsilon = gam_epsilon
+      gam_epsilon = gam_epsilon,
+      seed = seed
     )
   }
 
@@ -307,8 +324,7 @@ bridge_discover <- function(data,
   }
   researcher_edges <- c(researcher_edges, treatment, outcome)
 
-  # igraph::graph is imported via NAMESPACE
-  researcher_dag <- igraph::graph(edges = researcher_edges, directed = TRUE)
+  researcher_dag <- igraph::make_graph(edges = researcher_edges, directed = TRUE)
 
   # Convert discovered DAG to igraph format
   # bnlearn::amat is imported via NAMESPACE
@@ -344,6 +360,11 @@ bridge_discover <- function(data,
 #' @param handle_convergence Character string specifying how to handle convergence issues ("warn", "simplify", "error")
 #' @param gam_maxit Integer specifying maximum iterations for GAM fitting (default: 200)
 #' @param gam_epsilon Numeric specifying convergence tolerance for GAM fitting (default: 1e-7)
+#' @param seed Integer base seed for reproducible bootstrap resampling (default: 123)
+#'
+#' @details The treatment variable must be a factor (or coercible to one) with
+#' exactly two levels. The first factor level is treated as control and the
+#' second as treated (e.g. \code{0}/\code{1} or \code{"control"}/\code{"treatment"}).
 #'
 #' @return A list containing mediation analysis results
 #' @export
@@ -357,7 +378,8 @@ bridge_mediate <- function(data,
                            k_basis = 10,
                            handle_convergence = "warn",
                            gam_maxit = 200,
-                           gam_epsilon = 1e-7) {
+                           gam_epsilon = 1e-7,
+                           seed = 123) {
 
   # Validate data
   variables <- c(treatment, mediators, outcome)
@@ -366,10 +388,13 @@ bridge_mediate <- function(data,
   # Prepare data
   analysis_data <- data[, variables, drop = FALSE]
   analysis_data[[treatment]] <- as.factor(analysis_data[[treatment]])
+  t_levels <- get_treatment_levels(analysis_data[[treatment]], treatment)
 
   # Define bootstrap function
-  bootstrap_mediation <- function(data_boot, treat_boot, meds_boot, out_boot, nlin_boot, k_boot, handle_conv, gam_mx, gam_eps) {
+  bootstrap_mediation <- function(data_boot, treat_boot, meds_boot, out_boot, nlin_boot, k_boot, handle_conv, gam_mx, gam_eps, t_lvls) {
     n_sample <- nrow(data_boot)
+    ctrl_lvl <- t_lvls[1]
+    trt_lvl <- t_lvls[2]
 
     # Fit mediator models
     mediator_models <- list()
@@ -471,23 +496,23 @@ bridge_mediate <- function(data,
 
     # Compute effects
     mediator_preds <- list()
-    for (treat_val in c("0", "1")) {
+    for (treat_val in t_lvls) {
       mediator_preds[[treat_val]] <- list()
       for (mediator in meds_boot) {
-        pred_data <- data.frame(treatment_col = factor(rep(treat_val, n_sample)))
+        pred_data <- data.frame(treatment_col = factor(rep(treat_val, n_sample), levels = t_lvls))
         names(pred_data)[1] <- treat_boot
         mediator_preds[[treat_val]][[mediator]] <- stats::predict(mediator_models[[mediator]], newdata = pred_data)
       }
     }
 
-    pred_data_t1 <- data.frame(treatment_col = factor(rep("1", n_sample)))
+    pred_data_t1 <- data.frame(treatment_col = factor(rep(trt_lvl, n_sample), levels = t_lvls))
     names(pred_data_t1)[1] <- treat_boot
-    pred_data_t0 <- data.frame(treatment_col = factor(rep("0", n_sample)))
+    pred_data_t0 <- data.frame(treatment_col = factor(rep(ctrl_lvl, n_sample), levels = t_lvls))
     names(pred_data_t0)[1] <- treat_boot
 
     for (mediator in meds_boot) {
-      pred_data_t1[[mediator]] <- mediator_preds[["0"]][[mediator]]
-      pred_data_t0[[mediator]] <- mediator_preds[["0"]][[mediator]]
+      pred_data_t1[[mediator]] <- mediator_preds[[ctrl_lvl]][[mediator]]
+      pred_data_t0[[mediator]] <- mediator_preds[[ctrl_lvl]][[mediator]]
     }
 
     outcome_t1_m0 <- stats::predict(outcome_model, newdata = pred_data_t1)
@@ -497,23 +522,23 @@ bridge_mediate <- function(data,
     indirect_effects <- list()
     for (i in seq_along(meds_boot)) {
       mediator_focus <- meds_boot[i]
-      pred_data_nie <- data.frame(treatment_col = factor(rep("0", n_sample)))
+      pred_data_nie <- data.frame(treatment_col = factor(rep(ctrl_lvl, n_sample), levels = t_lvls))
       names(pred_data_nie)[1] <- treat_boot
       for (j in seq_along(meds_boot)) {
         if (j == i) {
-          pred_data_nie[[meds_boot[j]]] <- mediator_preds[["1"]][[meds_boot[j]]]
+          pred_data_nie[[meds_boot[j]]] <- mediator_preds[[trt_lvl]][[meds_boot[j]]]
         } else {
-          pred_data_nie[[meds_boot[j]]] <- mediator_preds[["0"]][[meds_boot[j]]]
+          pred_data_nie[[meds_boot[j]]] <- mediator_preds[[ctrl_lvl]][[meds_boot[j]]]
         }
       }
       outcome_nie <- stats::predict(outcome_model, newdata = pred_data_nie)
       indirect_effects[[paste0("nie_", mediator_focus)]] <- mean(outcome_nie - outcome_t0_m0, na.rm = TRUE)
     }
 
-    pred_data_total_t1 <- data.frame(treatment_col = factor(rep("1", n_sample)))
+    pred_data_total_t1 <- data.frame(treatment_col = factor(rep(trt_lvl, n_sample), levels = t_lvls))
     names(pred_data_total_t1)[1] <- treat_boot
     for (mediator in meds_boot) {
-      pred_data_total_t1[[mediator]] <- mediator_preds[["1"]][[mediator]]
+      pred_data_total_t1[[mediator]] <- mediator_preds[[trt_lvl]][[mediator]]
     }
     outcome_total_t1 <- stats::predict(outcome_model, newdata = pred_data_total_t1)
     total_effect <- mean(outcome_total_t1 - outcome_t0_m0, na.rm = TRUE)
@@ -529,29 +554,30 @@ bridge_mediate <- function(data,
 
     parallel::clusterExport(cl, varlist = c("analysis_data", "treatment", "mediators", "outcome",
                                             "nonlinear", "k_basis", "bootstrap_mediation",
-                                            "handle_convergence", "gam_maxit", "gam_epsilon"),
+                                            "handle_convergence", "gam_maxit", "gam_epsilon",
+                                            "seed", "t_levels"),
                             envir = environment())
     parallel::clusterEvalQ(cl, {
       library(mgcv)
     })
 
     boot_results_list <- parallel::parLapply(cl, 1:n_bootstraps, function(i) {
-      set.seed(123 + i)
+      set.seed(seed + i)
       sample_indices <- sample(1:nrow(analysis_data), replace = TRUE)
       sample_data <- analysis_data[sample_indices, ]
       bootstrap_mediation(sample_data, treatment, mediators, outcome, nonlinear, k_basis,
-                          handle_convergence, gam_maxit, gam_epsilon)
+                          handle_convergence, gam_maxit, gam_epsilon, t_levels)
     })
 
   } else {
     boot_results_list <- list()
     for (i in 1:n_bootstraps) {
-      set.seed(123 + i)
+      set.seed(seed + i)
       sample_indices <- sample(1:nrow(analysis_data), replace = TRUE)
       sample_data <- analysis_data[sample_indices, ]
       boot_results_list[[i]] <- bootstrap_mediation(sample_data, treatment, mediators, outcome,
                                                     nonlinear, k_basis, handle_convergence,
-                                                    gam_maxit, gam_epsilon)
+                                                    gam_maxit, gam_epsilon, t_levels)
     }
   }
 
@@ -599,6 +625,7 @@ bridge_mediate <- function(data,
 #' @param handle_convergence Character string specifying how to handle convergence issues
 #' @param gam_maxit Integer specifying maximum iterations for GAM fitting
 #' @param gam_epsilon Numeric specifying convergence tolerance for GAM fitting
+#' @param seed Integer base seed for reproducible perturbation and bootstrap resampling (default: 123)
 #'
 #' @return A list containing sensitivity analysis results
 #' @export
@@ -612,13 +639,15 @@ bridge_sensitivity <- function(data,
                                perturbation_sd = 0.1,
                                handle_convergence = "warn",
                                gam_maxit = 200,
-                               gam_epsilon = 1e-7) {
+                               gam_epsilon = 1e-7,
+                               seed = 123) {
 
   # Validate data
   variables <- c(treatment, mediators, outcome)
   validate_data(data, variables)
 
   # Create perturbed data
+  set.seed(seed)
   perturbed_data <- data
   for (mediator in mediators) {
     if (is.numeric(perturbed_data[[mediator]])) {
@@ -643,7 +672,8 @@ bridge_sensitivity <- function(data,
     parallel = parallel,
     handle_convergence = handle_convergence,
     gam_maxit = gam_maxit,
-    gam_epsilon = gam_epsilon
+    gam_epsilon = gam_epsilon,
+    seed = seed
   )
 
   return(list(
@@ -670,9 +700,11 @@ bridge_compare <- function(data, treatment, mediators, outcome) {
 
   variables_to_compare <- c(mediators, outcome)
 
-  # Split data by treatment
-  control_data <- data[data[[treatment]] == "0" | data[[treatment]] == 0, variables_to_compare, drop = FALSE]
-  treatment_data <- data[data[[treatment]] == "1" | data[[treatment]] == 1, variables_to_compare, drop = FALSE]
+  # Split data by treatment (first factor level = control, second = treated)
+  treatment_factor <- as.factor(data[[treatment]])
+  t_levels <- get_treatment_levels(treatment_factor, treatment)
+  control_data <- data[treatment_factor == t_levels[1], variables_to_compare, drop = FALSE]
+  treatment_data <- data[treatment_factor == t_levels[2], variables_to_compare, drop = FALSE]
 
   # Check if groups have sufficient data
   if (nrow(control_data) < 2 || nrow(treatment_data) < 2) {
@@ -946,6 +978,12 @@ print.bridge_analysis <- function(x, ...) {
 #' @export
 print.bridge_summary <- function(x, ...) {
   cat(x)
+}
+
+# Summary method for bridge_analysis objects
+#' @export
+summary.bridge_analysis <- function(object, ...) {
+  object$summary
 }
 
 # Plot method for bridge_analysis objects

@@ -15,7 +15,8 @@ bridge_mediate(
   k_basis = 10,
   handle_convergence = "warn",
   gam_maxit = 200,
-  gam_epsilon = 1e-07
+  gam_epsilon = 1e-07,
+  seed = 123
 )
 }
 \arguments{
@@ -40,6 +41,8 @@ bridge_mediate(
 \item{gam_maxit}{Integer specifying maximum iterations for GAM fitting (default: 200)}
 
 \item{gam_epsilon}{Numeric specifying convergence tolerance for GAM fitting (default: 1e-7)}
+
+\item{seed}{Integer base seed for reproducible bootstrap resampling (default: 123)}
 }
 \value{
 A list containing mediation analysis results
@@ -47,4 +50,9 @@ A list containing mediation analysis results
 \description{
 Performs causal mediation analysis using GAMs with bootstrapping to estimate
 direct and indirect effects through multiple mediators.
+}
+\details{
+The treatment variable must be a factor (or coercible to one) with
+exactly two levels. The first factor level is treated as control and the
+second as treated (e.g. \code{0}/\code{1} or \code{"control"}/\code{"treatment"}).
 }

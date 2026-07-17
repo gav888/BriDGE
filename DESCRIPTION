@@ -1,0 +1,51 @@
+Package: BriDGE
+Type: Package
+Title: Behavioural Research by Integrating DAGs and GAMs in Experiments
+Version: 1.0.0
+Authors@R: c(
+    person(
+      "Giuseppe", "Veltri",
+      email = "gaveltri@nus.edu.sg",
+      role = c("aut", "cre"),
+      comment = c(ORCID = "0000-0002-9472-2236")
+    )
+  )
+Description: Implements the BriDGE protocol for mechanistic causal analysis of
+    randomized controlled trial (RCT) data, as described in Veltri and Banerjee
+    (in press, Behavior Research Methods), "BriDGE the gap - improving
+    Behavioural research by integrating DAGs and GAMs in Experiments". BriDGE
+    combines causal discovery with experimental constraints (structure learning
+    via 'bnlearn' with treatment-edge whitelists and blacklists), mediation
+    analysis with nonlinear relationships through Generalized Additive Models
+    (GAMs, via 'mgcv'), bootstrap-based uncertainty quantification, sensitivity
+    analysis, and visualization. The package is agnostic to specific data
+    structures, making it suitable for researchers across domains who need to
+    move from "what works" to "why and how it works" in experimental data.
+    Key features include support for multiple mediators, parallel processing,
+    and integrated diagnostic tools for model validation.
+License: MIT + file LICENSE
+URL: https://github.com/gav888/BriDGE
+BugReports: https://github.com/gav888/BriDGE/issues
+Depends:
+    R (>= 3.5.0)
+Imports:
+    bnlearn (>= 4.5),
+    mgcv (>= 1.8-30),
+    ggplot2 (>= 3.3.0),
+    dplyr (>= 1.0.0),
+    igraph (>= 1.2.0),
+    boot (>= 1.3-20),
+    Hmisc (>= 4.4-0),
+    parallel,
+    stats,
+    graphics,
+    utils
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    mediation,
+    np
+Encoding: UTF-8
+Language: en-US
+Config/roxygen2/version: 8.0.0
